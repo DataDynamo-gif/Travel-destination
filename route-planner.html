@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Route Planner - TravelBharat | Plan Your Perfect Journey</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600;700&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        .route-bg {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #10b981 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .route-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('resources/hero-travel.jpg') center/cover;
+            opacity: 0.2;
+            z-index: 1;
+        }
+        .route-content {
+            position: relative;
+            z-index: 2;
+        }
+        .form-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        .route-option {
+            transition: all 0.3s ease;
+        }
+        .route-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .route-option.selected {
+            border-color: #f97316;
+            background-color: #fff7ed;
+        }
+        .cost-breakdown {
+            background: linear-gradient(135deg, #f97316, #fb923c);
+        }
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        .animate-fade-in-up {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .transport-icon {
+            font-size: 2rem;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+        .route-visualization {
+            position: relative;
+            height: 200px;
+            background: linear-gradient(90deg, #e5e7eb 0%, #d1d5db 50%, #e5e7eb 100%);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .route-dot {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #f97316;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .route-line {
+            position: absolute;
+            height: 4px;
+            background: linear-gradient(90deg, #f97316, #10b981);
+            top: 50%;
+            transform: translateY(-50%);
+            border-radius: 2px;
+        }
+        .travel-animation {
+            animation: travel 3s ease-in-out infinite;
+        }
+        @keyframes travel {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(20px); }
+        }
+    </style>
+</head>
+<body class="font-inter bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg fixed w-full top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold text-orange-500" style="font-family: 'Playfair Display', serif;">TravelBharat</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <a href="index.html" class="text-gray-700 hover:text-orange-500 transition-colors">Home</a>
+                        <a href="destinations.html" class="text-gray-700 hover:text-orange-500 transition-colors">Destinations</a>
+                        <a href="route-planner.html" class="text-orange-500 font-semibold hover:text-orange-600 transition-colors">Route Planner</a>
+                        <button onclick="surpriseMe()" class="bg-gradient-to-r from-orange-500 to-green-500 text-white px-4 py-2 rounded-full hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                            Surprise Me ✨
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="route-bg pt-24 pb-16">
+        <div class="route-content max-w-6xl mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-6xl font-bold text-white mb-6" style="font-family: 'Playfair Display', serif;">
+                Plan Your Perfect Route
+            </h1>
+            <p class="text-xl text-white opacity-90 mb-8 max-w-3xl mx-auto">
+                Get detailed travel plans with cost breakdowns, multiple transportation options, and accommodation suggestions. 
+                Plan smarter, travel better, and stay within budget.
+            </p>
+        </div>
+    </section>
+
+    <!-- Route Planning Form -->
+    <section class="py-12 -mt-8 relative z-10">
+        <div class="max-w-4xl mx-auto px-4">
+            <div class="form-card rounded-2xl p-8 shadow-xl">
+                <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center" style="font-family: 'Playfair Display', serif;">
+                    🗺️ Create Your Travel Plan
+                </h2>
+                
+                <form id="route-form" class="space-y-6">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">📍 Starting Point</label>
+                            <input type="text" id="origin" name="origin" placeholder="e.g., Delhi, Mumbai, Bangalore" 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">🎯 Destination</label>
+                            <input type="text" id="destination" name="destination" placeholder="e.g., Shoja, Kerala, Goa" 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+                        </div>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">📅 Start Date</label>
+                            <input type="date" id="startDate" name="startDate" 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">📅 End Date</label>
+                            <input type="date" id="endDate" name="endDate" 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+                        </div>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">👥 Number of Travelers</label>
+                            <select name="travelers" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                                <option value="1">Solo (1 person)</option>
+                                <option value="2">Couple (2 people)</option>
+                                <option value="4">Small Group (4 people)</option>
+                                <option value="6">Group (6 people)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">💰 Budget Preference</label>
+                            <select name="budget" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                                <option value="budget">Budget Friendly</option>
+                                <option value="mid">Mid-range</option>
+                                <option value="luxury">Luxury</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg">
+                            🚀 Generate My Travel Plan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Route Results Section -->
+    <section id="route-results" class="py-12 hidden">
+        <!-- Results will be dynamically loaded here -->
+    </section>
+
+    <!-- Sample Routes Section -->
+    <section class="py-16 bg-white">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-12 scroll-animate">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4" style="font-family: 'Playfair Display', serif;">
+                    Popular Routes
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Get inspired by these popular routes that offer amazing experiences within different budget ranges. 
+                    Each route has been carefully planned with hidden gems and cost-saving tips.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 scroll-animate">
+                <div class="route-option bg-gray-50 rounded-2xl p-6 cursor-pointer" onclick="loadSampleRoute('delhi-shoja')">
+                    <div class="flex items-center mb-4">
+                        <div class="route-visualization flex-1 mr-4">
+                            <div class="route-dot" style="left: 10%; top: 50%;"></div>
+                            <div class="route-line" style="left: 15%; width: 70%;"></div>
+                            <div class="route-dot" style="right: 10%; top: 50%;"></div>
+                        </div>
+                        <div class="text-right">
+                            <h3 class="text-xl font-bold text-gray-800">Delhi → Shoja</h3>
+                            <p class="text-gray-600 text-sm">Himachal Hidden Gem</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-orange-500 font-bold">₹8,000 - ₹12,000</span>
+                        <span class="text-gray-500 text-sm">3-4 days</span>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-4">
+                        Perfect weekend getaway to an unexplored Himalayan village with pristine beauty and authentic mountain experiences.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="bg-orange-100 text-orange-700 px-2 py-1 rounded-full text-xs">Trekking</span>
+                        <span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs">Nature</span>
+                        <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs">Photography</span>
+                    </div>
+                </div>
+
+                <div class="route-option bg-gray-50 rounded-2xl p-6 cursor-pointer" onclick="loadSampleRoute('mumbai-goa')">
+                    <div class="flex items-center mb-4">
+                        <div class="route-visualization flex-1 mr-4">
+                            <div class="route-dot" style="left: 10%; top: 50%;"></div>
+                            <div class="route-line" style="left: 15%; width: 70%;"></div>
+                            <div class="route-dot" style="right: 10%; top: 50%;"></div>
+                        </div>
+                        <div class="text-right">
+                            <h3 class="text-xl font-bold text-gray-800">Mumbai → Goa</h3>
+                            <p class="text-gray-600 text-sm">Beach Paradise</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-orange-500 font-bold">₹12,000 - ₹20,000</span>
+                        <span class="text-gray-500 text-sm">4-5 days</span>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-4">
+                        Classic beach destination with vibrant nightlife, delicious seafood, and a perfect mix of relaxation and adventure.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="bg-orange-100 text-orange-700 px-2 py-1 rounded-full text-xs">Beaches</span>
+                        <span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs">Nightlife</span>
+                        <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs">Food</span>
+                    </div>
+                </div>
+
+                <div class="route-option bg-gray-50 rounded-2xl p-6 cursor-pointer" onclick="loadSampleRoute('bangalore-kerala')">
+                    <div class="flex items-center mb-4">
+                        <div class="route-visualization flex-1 mr-4">
+                            <div class="route-dot" style="left: 10%; top: 50%;"></div>
+                            <div class="route-line" style="left: 15%; width: 70%;"></div>
+                            <div class="route-dot" style="right: 10%; top: 50%;"></div>
+                        </div>
+                        <div class="text-right">
+                            <h3 class="text-xl font-bold text-gray-800">Bangalore → Kerala</h3>
+                            <p class="text-gray-600 text-sm">Backwater Bliss</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-orange-500 font-bold">₹15,000 - ₹25,000</span>
+                        <span class="text-gray-500 text-sm">5-6 days</span>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-4">
+                        Serene houseboat experience through lush green canals with authentic Kerala culture and cuisine.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="bg-orange-100 text-orange-700 px-2 py-1 rounded-full text-xs">Houseboats</span>
+                        <span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs">Ayurveda</span>
+                        <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs">Culture</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tips Section -->
+    <section class="py-16 bg-gradient-to-br from-orange-50 to-green-50">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-12 scroll-animate">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4" style="font-family: 'Playfair Display', serif;">
+                    💡 Smart Travel Tips
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Make the most of your journey with these insider tips from experienced travelers and local experts.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 scroll-animate">
+                <div class="bg-white rounded-2xl p-6 shadow-lg">
+                    <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mb-4">
+                        <span class="text-2xl">💰</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Budget Smart</h3>
+                    <p class="text-gray-600">
+                        Book accommodations 2-3 weeks in advance for better rates. Consider homestays for authentic experiences and lower costs.
+                    </p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 shadow-lg">
+                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                        <span class="text-2xl">🎒</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Pack Light</h3>
+                    <p class="text-gray-600">
+                        Traveling with less luggage saves money on transportation and gives you more flexibility. Pack versatile clothing items.
+                    </p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 shadow-lg">
+                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                        <span class="text-2xl">🚂</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Transport Hacks</h3>
+                    <p class="text-gray-600">
+                        Book trains 120 days in advance for best prices. Consider overnight journeys to save on accommodation costs.
+                    </p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 shadow-lg">
+                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-4">
+                        <span class="text-2xl">🍛</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Eat Local</h3>
+                    <p class="text-gray-600">
+                        Try local restaurants and street food for authentic flavors at lower prices. Avoid touristy restaurants near popular attractions.
+                    </p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 shadow-lg">
+                    <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                        <span class="text-2xl">📱</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Stay Connected</h3>
+                    <p class="text-gray-600">
+                        Download offline maps and carry a power bank. Get a local SIM card for better connectivity and lower data costs.
+                    </p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 shadow-lg">
+                    <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
+                        <span class="text-2xl">🎭</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Cultural Respect</h3>
+                    <p class="text-gray-600">
+                        Learn basic local phrases and respect cultural norms. This enhances your experience and helps you connect with locals.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center">
+                <h3 class="text-2xl font-bold text-orange-500 mb-4" style="font-family: 'Playfair Display', serif;">TravelBharat</h3>
+                <p class="text-gray-400 mb-6 max-w-2xl mx-auto">
+                    Your trusted companion for discovering the real India. From hidden gems to budget-friendly adventures, 
+                    we're here to make your travel dreams come true.
+                </p>
+                <div class="border-t border-gray-700 pt-6">
+                    <p class="text-gray-500 text-sm">
+                        © 2024 TravelBharat. Crafted with ❤️ for Indian travelers.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+    <script>
+        // Sample route data
+        const sampleRoutes = {
+            'delhi-shoja': {
+                origin: 'Delhi',
+                destination: 'Shoja, Himachal Pradesh',
+                distance: '520 km',
+                duration: '12-14 hours',
+                transportation: {
+                    flight: { cost: 0, duration: 'N/A', type: 'No direct flights available' },
+                    train: { cost: 800, duration: '10 hours', type: 'Train to Chandigarh + Road' },
+                    bus: { cost: 1200, duration: '12 hours', type: 'Direct AC Volvo Bus' },
+                    private: { cost: 4000, duration: '10 hours', type: 'Private Taxi/Car' }
+                },
+                accommodation: [
+                    { type: 'Homestay', cost: 1000, rating: 4.5, description: 'Authentic local experience' },
+                    { type: 'Budget Hotel', cost: 1800, rating: 4.0, description: 'Basic amenities, good location' },
+                    { type: 'Mountain Lodge', cost: 3000, rating: 4.8, description: 'Premium experience with views' }
+                ],
+                food: {
+                    budget: 400,
+                    mid: 700,
+                    luxury: 1200
+                },
+                activities: [
+                    { name: 'Jalori Pass Trek', cost: 500, duration: '4-5 hours' },
+                    { name: 'Local Village Tour', cost: 300, duration: '2-3 hours' },
+                    { name: 'Waterfall Hike', cost: 200, duration: '3-4 hours' },
+                    { name: 'Photography Tour', cost: 400, duration: 'Full day' }
+                ],
+                tips: [
+                    'Book accommodation in advance during peak season',
+                    'Carry warm clothes even in summer',
+                    'Try local Kumaoni cuisine',
+                    'Respect local culture and environment'
+                ]
+            },
+            'mumbai-goa': {
+                origin: 'Mumbai',
+                destination: 'Goa',
+                distance: '600 km',
+                duration: '10-12 hours',
+                transportation: {
+                    flight: { cost: 3500, duration: '1 hour', type: 'Direct Flight' },
+                    train: { cost: 800, duration: '12 hours', type: 'Overnight Train' },
+                    bus: { cost: 1000, duration: '12 hours', type: 'AC Volvo Bus' },
+                    private: { cost: 5000, duration: '10 hours', type: 'Private Taxi/Car' }
+                },
+                accommodation: [
+                    { type: 'Beach Shack', cost: 1200, rating: 4.2, description: 'Basic beach accommodation' },
+                    { type: 'Boutique Hotel', cost: 2500, rating: 4.6, description: 'Mid-range with amenities' },
+                    { type: 'Beach Resort', cost: 5000, rating: 4.9, description: 'Luxury beachfront experience' }
+                ],
+                food: {
+                    budget: 500,
+                    mid: 800,
+                    luxury: 1500
+                },
+                activities: [
+                    { name: 'Beach Hopping', cost: 600, duration: 'Full day' },
+                    { name: 'Water Sports', cost: 1500, duration: '2-3 hours' },
+                    { name: 'Spice Plantation Tour', cost: 400, duration: '3-4 hours' },
+                    { name: 'Nightlife Experience', cost: 800, duration: 'Evening' }
+                ],
+                tips: [
+                    'Visit during November-February for best weather',
+                    'Rent a scooter for easy local transport',
+                    'Try local Goan cuisine and seafood',
+                    'Book beach shacks in North Goa for nightlife'
+                ]
+            },
+            'bangalore-kerala': {
+                origin: 'Bangalore',
+                destination: 'Kerala Backwaters',
+                distance: '550 km',
+                duration: '8-10 hours',
+                transportation: {
+                    flight: { cost: 2800, duration: '1.5 hours', type: 'Flight to Kochi' },
+                    train: { cost: 600, duration: '10 hours', type: 'Overnight Train' },
+                    bus: { cost: 800, duration: '10 hours', type: 'AC Volvo Bus' },
+                    private: { cost: 4500, duration: '8 hours', type: 'Private Taxi/Car' }
+                },
+                accommodation: [
+                    { type: 'Houseboat', cost: 4000, rating: 4.8, description: 'Authentic backwater experience' },
+                    { type: 'Homestay', cost: 1500, rating: 4.5, description: 'Local family experience' },
+                    { type: 'Resort', cost: 3500, rating: 4.7, description: 'Premium with Ayurvedic spa' }
+                ],
+                food: {
+                    budget: 600,
+                    mid: 900,
+                    luxury: 1400
+                },
+                activities: [
+                    { name: 'Houseboat Cruise', cost: 4000, duration: 'Full day' },
+                    { name: 'Ayurvedic Treatment', cost: 1500, duration: '2-3 hours' },
+                    { name: 'Village Tour', cost: 500, duration: '3-4 hours' },
+                    { name: 'Kathakali Performance', cost: 300, duration: '1 hour' }
+                ],
+                tips: [
+                    'Book houseboats in Alleppey or Kumarakom',
+                    'Try authentic Kerala sadya (feast)',
+                    'Carry mosquito repellent for backwaters',
+                    'Visit during November-February for pleasant weather'
+                ]
+            }
+        };
+
+        function loadSampleRoute(routeId) {
+            const route = sampleRoutes[routeId];
+            if (!route) return;
+
+            // Pre-fill form
+            document.getElementById('origin').value = route.origin;
+            document.getElementById('destination').value = route.destination;
+            
+            // Set default dates (tomorrow to 3 days from now)
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const returnDate = new Date();
+            returnDate.setDate(returnDate.getDate() + 4);
+            
+            document.getElementById('startDate').value = tomorrow.toISOString().split('T')[0];
+            document.getElementById('endDate').value = returnDate.toISOString().split('T')[0];
+            
+            // Show notification
+            showNotification(`Sample route loaded: ${route.origin} to ${route.destination}`, 'success');
+            
+            // Scroll to form
+            document.querySelector('#route-form').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function displayRouteResults(results) {
+            const resultsContainer = document.getElementById('route-results');
+            const numTravelers = parseInt(document.querySelector('select[name="travelers"]').value) || 1;
+            const budgetPref = document.querySelector('select[name="budget"]').value;
+            
+            // Calculate duration
+            const startDate = new Date(document.getElementById('startDate').value);
+            const endDate = new Date(document.getElementById('endDate').value);
+            const duration = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+            
+            resultsContainer.innerHTML = `
+                <div class="max-w-6xl mx-auto px-4">
+                    <div class="bg-white rounded-2xl p-8 shadow-xl mb-8">
+                        <h3 class="text-3xl font-bold text-gray-800 mb-6 text-center" style="font-family: 'Playfair Display', serif;">
+                            Your Custom Travel Plan
+                        </h3>
+                        
+                        <!-- Route Overview -->
+                        <div class="route-visualization mb-8">
+                            <div class="route-dot" style="left: 10%; top: 50%;">
+                                <div class="absolute -top-8 -left-4 text-sm font-semibold text-gray-700">${results.origin}</div>
+                            </div>
+                            <div class="route-line" style="left: 15%; width: 70%;">
+                                <div class="absolute top-6 left-1/2 transform -translate-x-1/2 travel-animation">
+                                    <span class="text-2xl">🚗</span>
+                                </div>
+                            </div>
+                            <div class="route-dot" style="right: 10%; top: 50%;">
+                                <div class="absolute -top-8 -right-8 text-sm font-semibold text-gray-700">${results.destination}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-3 gap-6 mb-8">
+                            <div class="text-center">
+                                <h4 class="text-lg font-semibold text-gray-700 mb-2">📏 Distance</h4>
+                                <p class="text-2xl font-bold text-orange-500">${results.distance}</p>
+                            </div>
+                            <div class="text-center">
+                                <h4 class="text-lg font-semibold text-gray-700 mb-2">⏱️ Travel Time</h4>
+                                <p class="text-2xl font-bold text-orange-500">${results.duration}</p>
+                            </div>
+                            <div class="text-center">
+                                <h4 class="text-lg font-semibold text-gray-700 mb-2">📅 Duration</h4>
+                                <p class="text-2xl font-bold text-orange-500">${duration} days</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Transportation Options -->
+                        <div class="mb-8">
+                            <h4 class="text-2xl font-bold text-gray-800 mb-6">🚗 Transportation Options</h4>
+                            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                ${Object.entries(results.transportation).map(([key, option]) => `
+                                    <div class="route-option p-4 border-2 border-gray-200 rounded-lg cursor-pointer" onclick="selectTransport('${key}', ${option.cost})">
+                                        <div class="text-center mb-3">
+                                            <div class="transport-icon">${getTransportIcon(key)}</div>
+                                            <h5 class="font-semibold capitalize">${key}</h5>
+                                        </div>
+                                        <div class="text-center">
+                                            <p class="text-sm text-gray-600 mb-1">${option.type}</p>
+                                            <p class="text-lg font-bold text-orange-500 mb-1">₹${option.cost * numTravelers}</p>
+                                            <p class="text-xs text-gray-500">${option.duration}</p>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <!-- Accommodation Options -->
+                        <div class="mb-8">
+                            <h4 class="text-2xl font-bold text-gray-800 mb-6">🏨 Accommodation Options</h4>
+                            <div class="grid md:grid-cols-3 gap-4">
+                                ${results.accommodation.map((hotel, index) => `
+                                    <div class="route-option p-4 border-2 border-gray-200 rounded-lg cursor-pointer" onclick="selectHotel(${index}, ${hotel.cost})">
+                                        <div class="flex justify-between items-start mb-3">
+                                            <h5 class="font-semibold">${hotel.type}</h5>
+                                            <div class="flex items-center">
+                                                <span class="text-yellow-400 text-sm mr-1">★</span>
+                                                <span class="text-sm text-gray-600">${hotel.rating}</span>
+                                            </div>
+                                        </div>
+                                        <p class="text-sm text-gray-600 mb-3">${hotel.description}</p>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-lg font-bold text-orange-500">₹${hotel.cost * numTravelers}/night</span>
+                                            <span class="text-sm text-gray-500">${duration} nights</span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <!-- Activities -->
+                        <div class="mb-8">
+                            <h4 class="text-2xl font-bold text-gray-800 mb-6">🎯 Recommended Activities</h4>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                ${results.activities.map((activity, index) => `
+                                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                        <div>
+                                            <h5 class="font-semibold">${activity.name}</h5>
+                                            <p class="text-sm text-gray-600">${activity.duration}</p>
+                                        </div>
+                                        <span class="text-lg font-bold text-orange-500">₹${activity.cost * numTravelers}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <!-- Cost Breakdown -->
+                        <div class="cost-breakdown text-white rounded-2xl p-8 mb-8">
+                            <h4 class="text-2xl font-bold mb-6 text-center">💰 Total Cost Breakdown</h4>
+                            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <div class="text-center">
+                                    <p class="text-3xl font-bold mb-2" id="transport-total">₹0</p>
+                                    <p class="text-sm opacity-90">Transportation</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-3xl font-bold mb-2" id="accommodation-total">₹0</p>
+                                    <p class="text-sm opacity-90">Accommodation</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-3xl font-bold mb-2" id="food-total">₹0</p>
+                                    <p class="text-sm opacity-90">Food & Dining</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-3xl font-bold mb-2" id="grand-total">₹0</p>
+                                    <p class="text-sm opacity-90">Total Estimate</p>
+                                </div>
+                            </div>
+                            <div class="text-center mt-6">
+                                <p class="text-lg opacity-90">For ${numTravelers} traveler${numTravelers > 1 ? 's' : ''} • ${duration} days • ${budgetPref} budget</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Tips -->
+                        <div class="bg-blue-50 rounded-2xl p-6">
+                            <h4 class="text-xl font-bold text-gray-800 mb-4">💡 Pro Tips for Your Journey</h4>
+                            <ul class="space-y-2">
+                                ${results.tips.map(tip => `<li class="flex items-start text-gray-700"><span class="text-blue-500 mr-2">•</span>${tip}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            resultsContainer.classList.remove('hidden');
+            resultsContainer.scrollIntoView({ behavior: 'smooth' });
+            
+            // Initialize cost calculation
+            updateTotalCost();
+        }
+
+        function getTransportIcon(type) {
+            const icons = {
+                flight: '✈️',
+                train: '🚂',
+                bus: '🚌',
+                private: '🚗'
+            };
+            return icons[type] || '🚗';
+        }
+
+        let selectedTransport = null;
+        let selectedHotel = null;
+
+        function selectTransport(type, cost) {
+            // Remove previous selection
+            document.querySelectorAll('.route-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Add selection to clicked option
+            event.currentTarget.classList.add('selected');
+            selectedTransport = { type, cost };
+            updateTotalCost();
+        }
+
+        function selectHotel(index, cost) {
+            // Remove previous hotel selection
+            document.querySelectorAll('.route-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Add selection to clicked option
+            event.currentTarget.classList.add('selected');
+            selectedHotel = { index, cost };
+            updateTotalCost();
+        }
+
+        function updateTotalCost() {
+            const numTravelers = parseInt(document.querySelector('select[name="travelers"]').value) || 1;
+            const budgetPref = document.querySelector('select[name="budget"]').value;
+            const startDate = new Date(document.getElementById('startDate').value);
+            const endDate = new Date(document.getElementById('endDate').value);
+            const duration = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+            
+            // Default values if nothing selected
+            const transportCost = selectedTransport ? selectedTransport.cost : 1200;
+            const hotelCostPerNight = selectedHotel ? selectedHotel.cost : 2000;
+            
+            // Calculate costs
+            const transportTotal = transportCost * numTravelers;
+            const accommodationTotal = hotelCostPerNight * numTravelers * duration;
+            
+            // Food cost based on budget preference
+            const foodMultipliers = { budget: 400, mid: 700, luxury: 1200 };
+            const foodTotal = foodMultipliers[budgetPref] * numTravelers * duration;
+            
+            const grandTotal = transportTotal + accommodationTotal + foodTotal;
+            
+            // Update display
+            document.getElementById('transport-total').textContent = `₹${transportTotal.toLocaleString()}`;
+            document.getElementById('accommodation-total').textContent = `₹${accommodationTotal.toLocaleString()}`;
+            document.getElementById('food-total').textContent = `₹${foodTotal.toLocaleString()}`;
+            document.getElementById('grand-total').textContent = `₹${grandTotal.toLocaleString()}`;
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default dates
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const returnDate = new Date();
+            returnDate.setDate(returnDate.getDate() + 4);
+            
+            document.getElementById('startDate').value = tomorrow.toISOString().split('T')[0];
+            document.getElementById('endDate').value = returnDate.toISOString().split('T')[0];
+        });
+    </script>
+</body>
+</html>

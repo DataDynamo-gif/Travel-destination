@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TravelBharat - Discover Your Perfect Indian Adventure</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600;700&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        .hero-bg {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #10b981 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('resources/hero-travel.jpg') center/cover;
+            opacity: 0.3;
+            z-index: 1;
+        }
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+        .floating-element {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #f97316, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-8px) rotateX(5deg);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        .animate-fade-in-up {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .quiz-option input:checked + span {
+            color: #f97316;
+            font-weight: 600;
+        }
+        .destination-card {
+            transition: all 0.3s ease;
+        }
+        .destination-card:hover {
+            transform: scale(1.05);
+        }
+        .splide__arrow {
+            background: rgba(249, 115, 22, 0.8) !important;
+            border: none !important;
+        }
+        .splide__arrow:hover {
+            background: rgba(249, 115, 22, 1) !important;
+        }
+    </style>
+</head>
+<body class="font-inter bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg fixed w-full top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold text-orange-500" style="font-family: 'Playfair Display', serif;">TravelBharat</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <a href="index.html" class="text-orange-500 font-semibold hover:text-orange-600 transition-colors">Home</a>
+                        <a href="destinations.html" class="text-gray-700 hover:text-orange-500 transition-colors">Destinations</a>
+                        <a href="route-planner.html" class="text-gray-700 hover:text-orange-500 transition-colors">Route Planner</a>
+                        <button onclick="surpriseMe()" class="bg-gradient-to-r from-orange-500 to-green-500 text-white px-4 py-2 rounded-full hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                            Surprise Me ✨
+                        </button>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button class="text-gray-700 hover:text-orange-500">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-bg min-h-screen flex items-center justify-center pt-16">
+        <!-- Floating Elements -->
+        <div class="floating-element top-20 left-10 text-6xl">🗺️</div>
+        <div class="floating-element top-40 right-20 text-4xl">✈️</div>
+        <div class="floating-element bottom-40 left-20 text-5xl">🏔️</div>
+        <div class="floating-element bottom-20 right-10 text-4xl">🏖️</div>
+        
+        <div class="hero-content text-center text-white px-4 max-w-4xl mx-auto">
+            <h1 class="text-5xl md:text-7xl font-bold mb-6" style="font-family: 'Playfair Display', serif;">
+                <span id="hero-typed"></span>
+            </h1>
+            <p class="text-xl md:text-2xl mb-8 opacity-90 max-w-2xl mx-auto leading-relaxed">
+                Your personalized journey through India's hidden gems and budget-friendly destinations starts here. 
+                Discover places you've never heard of, plan routes that save money, and create memories that last forever.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <button onclick="document.getElementById('travel-quiz').scrollIntoView({behavior: 'smooth'})" 
+                        class="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg">
+                    🎯 Take Travel Quiz
+                </button>
+                <a href="destinations.html" 
+                   class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300 transform hover:scale-105 backdrop-blur-sm">
+                    🌍 Explore Destinations
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Travel Quiz Section -->
+    <section id="travel-quiz" class="py-20 bg-gradient-to-br from-blue-50 to-green-50">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-12 scroll-animate">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4" style="font-family: 'Playfair Display', serif;">
+                    Find Your Perfect Destination
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Answer a few quick questions about your travel preferences, and we'll recommend the best destinations 
+                    tailored just for you. No generic suggestions - every recommendation is personalized based on your unique travel style.
+                </p>
+            </div>
+            
+            <div id="quiz-container" class="scroll-animate">
+                <!-- Quiz content will be dynamically loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Destinations Carousel -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-12 scroll-animate">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4" style="font-family: 'Playfair Display', serif;">
+                    Trending Destinations
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Discover the most loved destinations by fellow travelers. From hidden gems to popular hotspots, 
+                    these places offer unforgettable experiences without breaking the bank.
+                </p>
+            </div>
+
+            <div class="splide scroll-animate" id="destinations-carousel">
+                <div class="splide__track">
+                    <ul class="splide__list">
+                        <li class="splide__slide">
+                            <div class="destination-card bg-white rounded-2xl overflow-hidden shadow-lg mx-4">
+                                <img src="https://kimi-web-img.moonshot.cn/img/specialplacesofindia.com/e927100620f72b823419ae084bcbc082beba04d9.png" 
+                                     alt="Shoja, Himachal Pradesh" class="w-full h-64 object-cover">
+                                <div class="p-6">
+                                    <h3 class="text-2xl font-bold text-gray-800 mb-2">Shoja, Himachal Pradesh</h3>
+                                    <p class="text-gray-600 mb-4">Hidden gem in the Himalayas with pristine beauty, perfect for hiking and bird watching. Experience the authentic mountain life away from tourist crowds.</p>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-lg font-bold text-orange-500">₹8,000 - ₹12,000</span>
+                                        <div class="flex items-center">
+                                            <span class="text-yellow-400 mr-1">★★★★★</span>
+                                            <span class="text-sm text-gray-500">(4.8)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="splide__slide">
+                            <div class="destination-card bg-white rounded-2xl overflow-hidden shadow-lg mx-4">
+                                <img src="https://kimi-web-img.moonshot.cn/img/static.toiimg.com/8ba748eb30c2766e2729bb9735b99b991e13e9a1.jpg" 
+                                     alt="Kerala Backwaters" class="w-full h-64 object-cover">
+                                <div class="p-6">
+                                    <h3 class="text-2xl font-bold text-gray-800 mb-2">Kerala Backwaters</h3>
+                                    <p class="text-gray-600 mb-4">Serene houseboat experience through lush green canals. Perfect for relaxation and experiencing the authentic Kerala culture.</p>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-lg font-bold text-orange-500">₹15,000 - ₹25,000</span>
+                                        <div class="flex items-center">
+                                            <span class="text-yellow-400 mr-1">★★★★★</span>
+                                            <span class="text-sm text-gray-500">(4.9)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="splide__slide">
+                            <div class="destination-card bg-white rounded-2xl overflow-hidden shadow-lg mx-4">
+                                <img src="https://kimi-web-img.moonshot.cn/img/thewandertherapy.com/a841b6032ff419bbed4aacff3667b12359e6cb4b.jpg" 
+                                     alt="Goa Beaches" class="w-full h-64 object-cover">
+                                <div class="p-6">
+                                    <h3 class="text-2xl font-bold text-gray-800 mb-2">Goa Beaches</h3>
+                                    <p class="text-gray-600 mb-4">Sun, sand, and seafood with vibrant nightlife. From peaceful beaches to bustling markets, Goa has something for everyone.</p>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-lg font-bold text-orange-500">₹12,000 - ₹20,000</span>
+                                        <div class="flex items-center">
+                                            <span class="text-yellow-400 mr-1">★★★★☆</span>
+                                            <span class="text-sm text-gray-500">(4.6)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="splide__slide">
+                            <div class="destination-card bg-white rounded-2xl overflow-hidden shadow-lg mx-4">
+                                <img src="https://kimi-web-img.moonshot.cn/img/getwallpapers.com/7a24b995b1b49005b106c5d0fbcb6aa4353ab0d4.jpg" 
+                                     alt="Auli, Uttarakhand" class="w-full h-64 object-cover">
+                                <div class="p-6">
+                                    <h3 class="text-2xl font-bold text-gray-800 mb-2">Auli, Uttarakhand</h3>
+                                    <p class="text-gray-600 mb-4">Skiing capital of India with breathtaking Himalayan views. Perfect for adventure seekers and snow lovers.</p>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-lg font-bold text-orange-500">₹18,000 - ₹30,000</span>
+                                        <div class="flex items-center">
+                                            <span class="text-yellow-400 mr-1">★★★★★</span>
+                                            <span class="text-sm text-gray-500">(4.7)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="splide__slide">
+                            <div class="destination-card bg-white rounded-2xl overflow-hidden shadow-lg mx-4">
+                                <img src="https://kimi-web-img.moonshot.cn/img/cdn1.matadornetwork.com/e1ce55425e6fa16dcfee85acb9eb8483a161e4b5.jpg" 
+                                     alt="Mawlynnong, Meghalaya" class="w-full h-64 object-cover">
+                                <div class="p-6">
+                                    <h3 class="text-2xl font-bold text-gray-800 mb-2">Mawlynnong, Meghalaya</h3>
+                                    <p class="text-gray-600 mb-4">Asia's cleanest village with living root bridges. Experience sustainable tourism and natural beauty at its finest.</p>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-lg font-bold text-orange-500">₹10,000 - ₹15,000</span>
+                                        <div class="flex items-center">
+                                            <span class="text-yellow-400 mr-1">★★★★★</span>
+                                            <span class="text-sm text-gray-500">(4.8)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="py-20 bg-gradient-to-br from-orange-50 to-green-50">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-12 scroll-animate">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4" style="font-family: 'Playfair Display', serif;">
+                    How It Works
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Planning your perfect Indian adventure is just three simple steps away. We've made it effortless to discover, plan, and explore.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 scroll-animate">
+                <div class="text-center card-hover bg-white p-8 rounded-2xl shadow-lg">
+                    <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <span class="text-3xl">🎯</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">Take the Quiz</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Answer 6 quick questions about your travel style, budget, and preferences. Our smart algorithm analyzes your responses to understand exactly what you're looking for.
+                    </p>
+                </div>
+
+                <div class="text-center card-hover bg-white p-8 rounded-2xl shadow-lg">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <span class="text-3xl">🗺️</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">Get Personalized Recommendations</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Receive curated destination suggestions tailored to your preferences. Each recommendation includes detailed information about costs, best time to visit, and hidden gems.
+                    </p>
+                </div>
+
+                <div class="text-center card-hover bg-white p-8 rounded-2xl shadow-lg">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <span class="text-3xl">🚀</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">Plan Your Route</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Use our route planner to get detailed travel plans with cost breakdowns, accommodation suggestions, and transportation options. Everything you need for a perfect trip.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Us Section -->
+    <section class="py-20 bg-white">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-12 scroll-animate">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4" style="font-family: 'Playfair Display', serif;">
+                    Why TravelBharat?
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    We're not just another travel website. We're your personal travel companion, helping you discover the real India.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 scroll-animate">
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4 transform rotate-3">
+                        <span class="text-3xl text-white">💎</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Hidden Gems</h3>
+                    <p class="text-gray-600">Discover underrated destinations that most tourists never hear about</p>
+                </div>
+
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 transform -rotate-3">
+                        <span class="text-3xl text-white">💰</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Budget Friendly</h3>
+                    <p class="text-gray-600">Get accurate cost breakdowns and budget-friendly recommendations</p>
+                </div>
+
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 transform rotate-3">
+                        <span class="text-3xl text-white">🎯</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Personalized</h3>
+                    <p class="text-gray-600">Every recommendation is tailored to your specific preferences</p>
+                </div>
+
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 transform -rotate-3">
+                        <span class="text-3xl text-white">🗺️</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Route Planning</h3>
+                    <p class="text-gray-600">Detailed route suggestions with multiple transportation options</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section class="py-20 bg-gradient-to-r from-orange-500 to-green-500">
+        <div class="max-w-4xl mx-auto text-center px-4">
+            <h2 class="text-4xl md:text-5xl font-bold text-white mb-6" style="font-family: 'Playfair Display', serif;">
+                Ready to Explore India?
+            </h2>
+            <p class="text-xl text-white opacity-90 mb-8 max-w-2xl mx-auto">
+                Join thousands of travelers who've discovered their perfect Indian adventure with us. 
+                Your personalized journey is just one click away.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="document.getElementById('travel-quiz').scrollIntoView({behavior: 'smooth'})" 
+                        class="bg-white text-orange-500 px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                    🎯 Start Your Journey
+                </button>
+                <a href="destinations.html" 
+                   class="border-2 border-white text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-white hover:text-orange-500 transition-all duration-300 transform hover:scale-105">
+                    🌍 Browse Destinations
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center">
+                <h3 class="text-2xl font-bold text-orange-500 mb-4" style="font-family: 'Playfair Display', serif;">TravelBharat</h3>
+                <p class="text-gray-400 mb-6 max-w-2xl mx-auto">
+                    Your trusted companion for discovering the real India. From hidden gems to budget-friendly adventures, 
+                    we're here to make your travel dreams come true.
+                </p>
+                <div class="border-t border-gray-700 pt-6">
+                    <p class="text-gray-500 text-sm">
+                        © 2024 TravelBharat. Crafted with ❤️ for Indian travelers.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+    <script>
+        // Initialize carousel
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof Splide !== 'undefined') {
+                new Splide('#destinations-carousel', {
+                    type: 'loop',
+                    perPage: 3,
+                    perMove: 1,
+                    gap: '2rem',
+                    autoplay: true,
+                    interval: 4000,
+                    pauseOnHover: true,
+                    breakpoints: {
+                        768: {
+                            perPage: 1,
+                        },
+                        1024: {
+                            perPage: 2,
+                        }
+                    }
+                }).mount();
+            }
+        });
+    </script>
+</body>
+</html>

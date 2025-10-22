@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Destinations - TravelBharat | Explore India's Hidden Gems</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600;700&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        .destination-card {
+            transition: all 0.3s ease;
+        }
+        .destination-card:hover {
+            transform: translateY(-8px) rotateX(2deg);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        .filter-checkbox:checked + label {
+            background-color: #f97316;
+            color: white;
+        }
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        .animate-fade-in-up {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .search-container {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #10b981 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .search-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('resources/hero-travel.jpg') center/cover;
+            opacity: 0.2;
+            z-index: 1;
+        }
+        .search-content {
+            position: relative;
+            z-index: 2;
+        }
+        .rating-stars {
+            color: #fbbf24;
+        }
+        .budget-badge {
+            background: linear-gradient(135deg, #f97316, #fb923c);
+        }
+        .hidden-gems-badge {
+            background: linear-gradient(135deg, #10b981, #34d399);
+        }
+    </style>
+</head>
+<body class="font-inter bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg fixed w-full top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold text-orange-500" style="font-family: 'Playfair Display', serif;">TravelBharat</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <a href="index.html" class="text-gray-700 hover:text-orange-500 transition-colors">Home</a>
+                        <a href="destinations.html" class="text-orange-500 font-semibold hover:text-orange-600 transition-colors">Destinations</a>
+                        <a href="route-planner.html" class="text-gray-700 hover:text-orange-500 transition-colors">Route Planner</a>
+                        <button onclick="surpriseMe()" class="bg-gradient-to-r from-orange-500 to-green-500 text-white px-4 py-2 rounded-full hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                            Surprise Me ✨
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Search Hero Section -->
+    <section class="search-container pt-24 pb-16">
+        <div class="search-content max-w-6xl mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-6xl font-bold text-white mb-6" style="font-family: 'Playfair Display', serif;">
+                Discover Amazing Destinations
+            </h1>
+            <p class="text-xl text-white opacity-90 mb-8 max-w-3xl mx-auto">
+                From hidden gems to popular hotspots, find your perfect Indian adventure. 
+                Filter by budget, region, activities, and more to discover destinations that match your travel style.
+            </p>
+            
+            <!-- Search Bar -->
+            <div class="max-w-2xl mx-auto mb-8">
+                <div class="relative">
+                    <input type="text" id="search-input" placeholder="Search destinations..." 
+                           class="w-full px-6 py-4 text-lg rounded-full shadow-lg focus:outline-none focus:ring-4 focus:ring-orange-300">
+                    <button onclick="searchDestinations()" 
+                            class="absolute right-2 top-2 bg-orange-500 hover:bg-orange-600 text-white p-3 rounded-full transition-colors">
+                        🔍
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="py-12">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Filters Sidebar -->
+                <div class="lg:w-1/4">
+                    <div class="bg-white rounded-2xl shadow-lg p-6 sticky top-24">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6" style="font-family: 'Playfair Display', serif;">
+                            Filter Destinations
+                        </h3>
+                        
+                        <div id="filter-container">
+                            <!-- Filters will be dynamically loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Destinations Grid -->
+                <div class="lg:w-3/4">
+                    <!-- Sort and View Options -->
+                    <div class="flex flex-col sm:flex-row justify-between items-center mb-8">
+                        <div class="mb-4 sm:mb-0">
+                            <span class="text-gray-600">Showing <span id="results-count">20</span> destinations</span>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <select id="sort-select" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                                <option value="popularity">Sort by Popularity</option>
+                                <option value="rating">Sort by Rating</option>
+                                <option value="budget-low">Budget: Low to High</option>
+                                <option value="budget-high">Budget: High to Low</option>
+                                <option value="name">Sort by Name</option>
+                            </select>
+                            <div class="flex border border-gray-300 rounded-lg overflow-hidden">
+                                <button onclick="setView('grid')" id="grid-view" class="px-3 py-2 bg-orange-500 text-white">
+                                    ⊞
+                                </button>
+                                <button onclick="setView('list')" id="list-view" class="px-3 py-2 text-gray-600 hover:bg-gray-100">
+                                    ☰
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Destinations Grid -->
+                    <div id="destination-grid" class="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+                        <!-- Destination cards will be dynamically loaded here -->
+                    </div>
+
+                    <!-- Load More Button -->
+                    <div class="text-center mt-12">
+                        <button onclick="loadMoreDestinations()" 
+                                class="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 transform hover:scale-105">
+                            Load More Destinations
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Destination Detail Modal -->
+    <div id="destination-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl max-w-4xl w-full max-h-screen overflow-y-auto">
+                <div id="modal-content">
+                    <!-- Modal content will be dynamically loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12 mt-16">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center">
+                <h3 class="text-2xl font-bold text-orange-500 mb-4" style="font-family: 'Playfair Display', serif;">TravelBharat</h3>
+                <p class="text-gray-400 mb-6 max-w-2xl mx-auto">
+                    Your trusted companion for discovering the real India. From hidden gems to budget-friendly adventures, 
+                    we're here to make your travel dreams come true.
+                </p>
+                <div class="border-t border-gray-700 pt-6">
+                    <p class="text-gray-500 text-sm">
+                        © 2024 TravelBharat. Crafted with ❤️ for Indian travelers.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+    <script>
+        // Extended destinations data
+        const allDestinations = [
+            {
+                id: 1,
+                name: 'Shoja, Himachal Pradesh',
+                region: 'north',
+                budget: 'budget',
+                budgetRange: [8000, 12000],
+                activities: ['adventure', 'nature'],
+                season: 'winter',
+                image: 'https://kimi-web-img.moonshot.cn/img/specialplacesofindia.com/e927100620f72b823419ae084bcbc082beba04d9.png',
+                description: 'Hidden gem in Himalayas with pristine beauty, perfect for hiking and bird watching. Experience the authentic mountain life away from tourist crowds.',
+                longDescription: 'Shoja is a serene and unexplored hamlet located in the Seraj Valley of Himachal Pradesh. Surrounded by dense forests of oak, pine, and deodar, this picturesque village offers breathtaking views of the Himalayan ranges. The place is perfect for those seeking solitude and natural beauty away from the crowded tourist destinations.',
+                rating: 4.8,
+                bestTime: 'October to March',
+                hiddenGems: ['Jalori Pass trek', 'Waterfall hike', 'Local village experience', 'Serolsar Lake', 'Raghupur Fort'],
+                accommodations: ['Homestays ₹800-1200/night', 'Budget hotels ₹1500-2500/night'],
+                foodBudget: '₹300-500/day',
+                transportation: 'Bus from Delhi ₹800-1200, Private taxi ₹3000-4000',
+                popularActivities: ['Trekking', 'Bird watching', 'Photography', 'Nature walks', 'Village tourism'],
+                underratedSpots: ['Waterfall Point', 'Tirthan Valley View', 'Local temples', 'Forest trails'],
+                isHiddenGem: true
+            },
+            {
+                id: 2,
+                name: 'Kerala Backwaters',
+                region: 'south',
+                budget: 'mid',
+                budgetRange: [15000, 25000],
+                activities: ['relaxation', 'nature'],
+                season: 'winter',
+                image: 'https://kimi-web-img.moonshot.cn/img/static.toiimg.com/8ba748eb30c2766e2729bb9735b99b991e13e9a1.jpg',
+                description: 'Serene houseboat experience through lush green canals. Perfect for relaxation and experiencing the authentic Kerala culture.',
+                longDescription: 'The Kerala Backwaters are a network of interconnected canals, rivers, lakes, and inlets, a labyrinthine system formed by more than 900 km of waterways. The backwaters have a unique ecosystem where freshwater from the rivers meets the seawater from the Arabian Sea.',
+                rating: 4.9,
+                bestTime: 'November to February',
+                hiddenGems: ['Kumbalangi village', 'Pathiramanal island', 'Local toddy shops', 'Kumarakom bird sanctuary', 'Aruvikkuzhi Waterfall'],
+                accommodations: ['Houseboats ₹3000-8000/night', 'Resorts ₹2000-5000/night'],
+                foodBudget: '₹500-800/day',
+                transportation: 'Train ₹800-1500, Flight ₹3000-6000',
+                popularActivities: ['Houseboat cruises', 'Village tours', 'Canoeing', 'Bird watching', 'Ayurvedic treatments'],
+                underratedSpots: ['Punnamada Lake', 'Chavara Bhavan', 'St. Mary\'s Church', 'Local markets'],
+                isHiddenGem: false
+            },
+            {
+                id: 3,
+                name: 'Goa Beaches',
+                region: 'west',
+                budget: 'mid',
+                budgetRange: [12000, 20000],
+                activities: ['relaxation', 'food'],
+                season: 'winter',
+                image: 'https://kimi-web-img.moonshot.cn/img/thewandertherapy.com/a841b6032ff419bbed4aacff3667b12359e6cb4b.jpg',
+                description: 'Sun, sand, and seafood with vibrant nightlife. From peaceful beaches to bustling markets, Goa has something for everyone.',
+                longDescription: 'Goa, the smallest state in India, is renowned for its stunning beaches, vibrant nightlife, and rich Portuguese heritage. Beyond the popular tourist spots, Goa offers a diverse range of experiences from serene South Goa beaches to the bustling markets of North Goa.',
+                rating: 4.6,
+                bestTime: 'November to February',
+                hiddenGems: ['Butterfly Beach', 'Cabo de Rama fort', 'Local fish markets', 'Divar Island', 'Chorla Ghat'],
+                accommodations: ['Beach shacks ₹1000-2000/night', 'Boutique hotels ₹2500-5000/night'],
+                foodBudget: '₹400-700/day',
+                transportation: 'Bus ₹600-1200, Flight ₹2500-5000',
+                popularActivities: ['Beach hopping', 'Water sports', 'Nightlife', 'Spice plantation tours', 'Heritage walks'],
+                underratedSpots: ['Kakolem Beach', 'Hollant Beach', 'Betalbatim Beach', 'Local villages'],
+                isHiddenGem: false
+            },
+            {
+                id: 4,
+                name: 'Auli, Uttarakhand',
+                region: 'north',
+                budget: 'luxury',
+                budgetRange: [18000, 30000],
+                activities: ['adventure', 'nature'],
+                season: 'winter',
+                image: 'https://kimi-web-img.moonshot.cn/img/getwallpapers.com/7a24b995b1b49005b106c5d0fbcb6aa4353ab0d4.jpg',
+                description: 'Skiing capital of India with breathtaking Himalayan views. Perfect for adventure seekers and snow lovers.',
+                longDescription: 'Auli is a pristine ski destination in the Chamoli district of Uttarakhand, famous for its snowy slopes, breathtaking views of the Himalayan peaks, and adventure sports. It\'s often referred to as the "Skiing Capital of India" and offers some of the best skiing experiences in the country.',
+                rating: 4.7,
+                bestTime: 'December to February',
+                hiddenGems: ['Gorson Bugyal', 'Kwani Bugyal', 'Chenab Lake', 'Joshimath temples', 'Valley of Flowers'],
+                accommodations: ['Ski resorts ₹3000-8000/night', 'Mountain lodges ₹2000-4000/night'],
+                foodBudget: '₹600-1000/day',
+                transportation: 'Bus ₹1000-1800, Private taxi ₹4000-6000',
+                popularActivities: ['Skiing', 'Snowboarding', 'Cable car rides', 'Trekking', 'Camping'],
+                underratedSpots: ['Auli Artificial Lake', 'Trishul Peak views', 'Nanda Devi National Park', 'Local markets'],
+                isHiddenGem: false
+            },
+            {
+                id: 5,
+                name: 'Mawlynnong, Meghalaya',
+                region: 'northeast',
+                budget: 'budget',
+                budgetRange: [10000, 15000],
+                activities: ['culture', 'nature'],
+                season: 'monsoon',
+                image: 'https://kimi-web-img.moonshot.cn/img/cdn1.matadornetwork.com/e1ce55425e6fa16dcfee85acb9eb8483a161e4b5.jpg',
+                description: 'Asia\'s cleanest village with living root bridges. Experience sustainable tourism and natural beauty at its finest.',
+                longDescription: 'Mawlynnong, located in the East Khasi Hills of Meghalaya, is renowned as "Asia\'s Cleanest Village." This charming village showcases the perfect blend of nature and human ingenuity, featuring the famous living root bridges that are centuries old and created by the local Khasi tribe.',
+                rating: 4.8,
+                bestTime: 'October to May',
+                hiddenGems: ['Single Decker Living Root Bridge', 'Balancing Rock', 'Sky View Point', 'Riwai Village', 'Dawki River'],
+                accommodations: ['Homestays ₹800-1500/night', 'Eco lodges ₹1200-2500/night'],
+                foodBudget: '₹350-600/day',
+                transportation: 'Bus ₹1200-2000, Shared taxi ₹2000-3500',
+                popularActivities: ['Village walks', 'Root bridge trekking', 'Photography', 'Cultural experiences', 'Nature exploration'],
+                underratedSpots: ['Mawlynnong waterfall', 'Church of Epiphany', 'Local schools', 'Community centers'],
+                isHiddenGem: true
+            },
+            {
+                id: 6,
+                name: 'Chatpal, Jammu & Kashmir',
+                region: 'north',
+                budget: 'budget',
+                budgetRange: [9000, 14000],
+                activities: ['nature', 'relaxation'],
+                season: 'summer',
+                image: 'https://kimi-web-img.moonshot.cn/img/dynamic-media-cdn.tripadvisor.com/8308b9b96e44d21daf059c166f2bb0927ea25205.jpg',
+                description: 'Untouched paradise in South Kashmir with dense pine forests and clear mountain streams. Perfect for nature lovers seeking peace.',
+                longDescription: 'Chatpal is a hidden paradise tucked away in the pristine valleys of South Kashmir. Unlike the bustling tourist hubs of Kashmir, this offbeat destination offers an untouched natural retreat surrounded by dense pine forests, rolling meadows, and crystal-clear mountain streams.',
+                rating: 4.6,
+                bestTime: 'May to September',
+                hiddenGems: ['Daksum meadows', 'Lal Chowk area', 'Local shepherds\' trails', 'Mountain viewpoints', 'Forest campsites'],
+                accommodations: ['Forest rest houses ₹600-1200/night', 'Camping ₹400-800/night'],
+                foodBudget: '₹300-500/day',
+                transportation: 'Bus ₹1000-1800, Private taxi ₹3500-5000',
+                popularActivities: ['Nature walks', 'Photography', 'Hiking', 'Camping', 'Bird watching'],
+                underratedSpots: ['Shepherd villages', 'Hidden waterfalls', 'Mountain springs', 'Forest clearings'],
+                isHiddenGem: true
+            },
+            {
+                id: 7,
+                name: 'Nelliyampathy, Kerala',
+                region: 'south',
+                budget: 'mid',
+                budgetRange: [12000, 18000],
+                activities: ['nature', 'relaxation'],
+                season: 'winter',
+                image: 'https://kimi-web-img.moonshot.cn/img/www.keralabackwater.com/d75273b6f58ad448916ea0e82f2db1330f2fe11a.jpg',
+                description: 'Poor Man\'s Ooty with tea and coffee plantations. Mist-covered hills and dense forests create a perfect getaway.',
+                longDescription: 'Nelliyampathy, often called the "Poor Man\'s Ooty," is a serene hill station in Kerala known for its extensive tea and coffee plantations. The mist-covered hills, dense forests, and waterfalls make it a perfect getaway for those looking to escape the summer heat.',
+                rating: 4.5,
+                bestTime: 'September to May',
+                hiddenGems: ['Kesavanpara viewpoint', 'Mampara tea estates', 'Seethargundu viewpoint', 'Orange farms', 'Forest waterfalls'],
+                accommodations: ['Plantation stays ₹1500-3000/night', 'Resorts ₹2500-4500/night'],
+                foodBudget: '₹400-650/day',
+                transportation: 'Bus ₹800-1500, Private taxi ₹2500-4000',
+                popularActivities: ['Plantation tours', 'Trekking', 'Viewpoint visits', 'Tea tasting', 'Nature photography'],
+                underratedSpots: ['Local farms', 'Traditional temples', 'Village markets', 'Hidden trails'],
+                isHiddenGem: true
+            },
+            {
+                id: 8,
+                name: 'Kemmangundi, Karnataka',
+                region: 'south',
+                budget: 'budget',
+                budgetRange: [8000, 12000],
+                activities: ['nature', 'adventure'],
+                season: 'winter',
+                image: 'https://kimi-web-img.moonshot.cn/img/www.ekeralatourism.net/115639e52a7e2b6ef5ec23b7864012bbb5686668.jpg',
+                description: 'Hidden treasure in Western Ghats with lush landscapes and waterfalls. Perfect for trekking and nature lovers.',
+                longDescription: 'Kemmangundi is a hidden treasure nestled in the Western Ghats of Karnataka. Known for its lush green landscapes, magnificent waterfalls, and excellent trekking trails, this hill station offers a perfect retreat for nature lovers and adventure enthusiasts.',
+                rating: 4.4,
+                bestTime: 'October to April',
+                hiddenGems: ['Hebbe Falls', 'Z Point', 'Rock Garden', 'Shanti Falls', 'Coffee plantations'],
+                accommodations: ['Guest houses ₹800-1500/night', 'Homestays ₹1000-2000/night'],
+                foodBudget: '₹300-500/day',
+                transportation: 'Bus ₹600-1200, Private taxi ₹2000-3500',
+                popularActivities: ['Trekking', 'Waterfall visits', 'Plantation walks', 'Photography', 'Camping'],
+                underratedSpots: ['Local viewpoints', 'Traditional villages', 'Coffee processing units', 'Forest trails'],
+                isHiddenGem: true
+            },
+            {
+                id: 9,
+                name: 'Yuksom, Sikkim',
+                region: 'northeast',
+                budget: 'mid',
+                budgetRange: [14000, 22000],
+                activities: ['culture', 'adventure'],
+                season: 'summer',
+                image: 'https://kimi-web-img.moonshot.cn/img/www.tourmyindia.com/1fc8ec0a5e1d326aebcd2d7b22bde40d4b7ecf06.webp',
+                description: 'Historic village serving as gateway to Kanchenjunga National Park. Rich cultural heritage and stunning mountain views.',
+                longDescription: 'Yuksom is a historic and scenic village in Sikkim that serves as the gateway to Kanchenjunga National Park. Known for its ancient monasteries, trekking routes, and tranquil environment, Yuksom is a paradise for trekkers and peace seekers alike.',
+                rating: 4.7,
+                bestTime: 'March to June, September to November',
+                hiddenGems: ['Dubdi Monastery', 'Norbugang Park', 'Kathok Lake', 'Tashiding Monastery', 'Local markets'],
+                accommodations: ['Heritage hotels ₹1500-3000/night', 'Mountain lodges ₹1200-2500/night'],
+                foodBudget: '₹400-700/day',
+                transportation: 'Shared taxi ₹1500-2500, Private taxi ₹3000-5000',
+                popularActivities: ['Trekking', 'Monastery visits', 'Cultural tours', 'Nature walks', 'Photography'],
+                underratedSpots: ['Local villages', 'Traditional handicrafts', 'Organic farms', 'Mountain viewpoints'],
+                isHiddenGem: true
+            },
+            {
+                id: 10,
+                name: 'Askot, Uttarakhand',
+                region: 'north',
+                budget: 'budget',
+                budgetRange: [7000, 11000],
+                activities: ['wildlife', 'nature'],
+                season: 'summer',
+                image: 'https://kimi-web-img.moonshot.cn/img/www.fabhotels.com/7fd2df8116ebd4b9209ef16ed661e18a14cc387c.jpg',
+                description: 'Unexplored hill town famous for wildlife sanctuary and mountain views. Home to Himalayan wildlife.',
+                longDescription: 'Askot is an unexplored hill town nestled in the Pithoragarh district of Uttarakhand, famous for its wildlife sanctuary and breathtaking mountain views. The Askot Wildlife Sanctuary is home to diverse Himalayan wildlife including black bears, musk deer, and snow leopards.',
+                rating: 4.3,
+                bestTime: 'April to June, September to November',
+                hiddenGems: ['Askot Wildlife Sanctuary', 'Mountaintop temples', 'Traditional villages', 'Forest trails', 'River viewpoints'],
+                accommodations: ['Forest lodges ₹800-1500/night', 'Guest houses ₹600-1200/night'],
+                foodBudget: '₹250-450/day',
+                transportation: 'Bus ₹800-1400, Private taxi ₹2500-4000',
+                popularActivities: ['Wildlife spotting', 'Trekking', 'Photography', 'Village tourism', 'Nature walks'],
+                underratedSpots: ['Local temples', 'Traditional markets', 'Mountain streams', 'Village schools'],
+                isHiddenGem: true
+            }
+        ];
+
+        let currentView = 'grid';
+        let currentSort = 'popularity';
+        let filteredDestinations = [...allDestinations];
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDestinationFilters();
+            renderDestinations();
+            
+            // Add event listeners
+            document.getElementById('sort-select').addEventListener('change', function() {
+                currentSort = this.value;
+                sortAndRenderDestinations();
+            });
+            
+            document.getElementById('search-input').addEventListener('input', function() {
+                searchDestinations();
+            });
+        });
+
+        function renderDestinations() {
+            const grid = document.getElementById('destination-grid');
+            const resultsCount = document.getElementById('results-count');
+            
+            resultsCount.textContent = filteredDestinations.length;
+            
+            if (currentView === 'grid') {
+                grid.className = 'grid md:grid-cols-2 xl:grid-cols-3 gap-6';
+                grid.innerHTML = filteredDestinations.map(dest => createDestinationCard(dest)).join('');
+            } else {
+                grid.className = 'space-y-6';
+                grid.innerHTML = filteredDestinations.map(dest => createDestinationListItem(dest)).join('');
+            }
+
+            // Animate cards
+            if (typeof anime !== 'undefined') {
+                anime({
+                    targets: '.destination-card',
+                    opacity: [0, 1],
+                    translateY: [30, 0],
+                    duration: 600,
+                    delay: anime.stagger(100),
+                    easing: 'easeOutQuad'
+                });
+            }
+        }
+
+        function createDestinationCard(dest) {
+            const stars = '★'.repeat(Math.floor(dest.rating)) + '☆'.repeat(5 - Math.floor(dest.rating));
+            const badges = [];
+            
+            if (dest.isHiddenGem) badges.push('<span class="hidden-gems-badge text-white px-2 py-1 rounded-full text-xs font-semibold">Hidden Gem</span>');
+            
+            return `
+                <div class="destination-card bg-white rounded-2xl overflow-hidden shadow-lg cursor-pointer" onclick="showDestinationDetail(${dest.id})">
+                    <div class="relative">
+                        <img src="${dest.image}" alt="${dest.name}" class="w-full h-48 object-cover">
+                        <div class="absolute top-4 left-4 flex flex-wrap gap-2">
+                            ${badges.join('')}
+                        </div>
+                        <div class="absolute bottom-4 right-4 budget-badge text-white px-3 py-1 rounded-full text-sm font-bold">
+                            ₹${dest.budgetRange[0]/1000}k - ₹${dest.budgetRange[1]/1000}k
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">${dest.name}</h3>
+                        <p class="text-gray-600 text-sm mb-3 leading-relaxed">${dest.description}</p>
+                        <div class="flex justify-between items-center mb-3">
+                            <div class="flex items-center">
+                                <span class="rating-stars text-sm mr-1">${stars}</span>
+                                <span class="text-gray-500 text-sm">(${dest.rating})</span>
+                            </div>
+                            <span class="text-xs text-gray-500 capitalize">${dest.region} India</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Best time: ${dest.bestTime}</span>
+                            <button class="text-orange-500 hover:text-orange-600 font-semibold text-sm">
+                                View Details →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createDestinationListItem(dest) {
+            const stars = '★'.repeat(Math.floor(dest.rating)) + '☆'.repeat(5 - Math.floor(dest.rating));
+            
+            return `
+                <div class="destination-card bg-white rounded-2xl p-6 shadow-lg cursor-pointer" onclick="showDestinationDetail(${dest.id})">
+                    <div class="flex flex-col md:flex-row gap-6">
+                        <div class="md:w-1/3">
+                            <img src="${dest.image}" alt="${dest.name}" class="w-full h-48 md:h-32 object-cover rounded-xl">
+                        </div>
+                        <div class="md:w-2/3">
+                            <div class="flex justify-between items-start mb-3">
+                                <h3 class="text-2xl font-bold text-gray-800">${dest.name}</h3>
+                                ${dest.isHiddenGem ? '<span class="hidden-gems-badge text-white px-2 py-1 rounded-full text-xs font-semibold">Hidden Gem</span>' : ''}
+                            </div>
+                            <p class="text-gray-600 mb-3 leading-relaxed">${dest.description}</p>
+                            <div class="flex flex-wrap gap-4 items-center">
+                                <div class="flex items-center">
+                                    <span class="rating-stars mr-1">${stars}</span>
+                                    <span class="text-gray-500">(${dest.rating})</span>
+                                </div>
+                                <span class="budget-badge text-white px-3 py-1 rounded-full text-sm font-bold">
+                                    ₹${dest.budgetRange[0]/1000}k - ₹${dest.budgetRange[1]/1000}k
+                                </span>
+                                <span class="text-sm text-gray-600 capitalize">${dest.region} India</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showDestinationDetail(destId) {
+            const dest = allDestinations.find(d => d.id === destId);
+            if (!dest) return;
+
+            const modal = document.getElementById('destination-modal');
+            const modalContent = document.getElementById('modal-content');
+            
+            const stars = '★'.repeat(Math.floor(dest.rating)) + '☆'.repeat(5 - Math.floor(dest.rating));
+            
+            modalContent.innerHTML = `
+                <div class="relative">
+                    <img src="${dest.image}" alt="${dest.name}" class="w-full h-64 object-cover">
+                    <button onclick="closeDestinationModal()" 
+                            class="absolute top-4 right-4 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition-colors">
+                        ✕
+                    </button>
+                    <div class="absolute bottom-4 left-4 right-4">
+                        <h2 class="text-3xl font-bold text-white mb-2" style="font-family: 'Playfair Display', serif;">${dest.name}</h2>
+                        <div class="flex items-center">
+                            <span class="rating-stars text-lg mr-2">${stars}</span>
+                            <span class="text-white text-lg">(${dest.rating})</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="p-8">
+                    <div class="grid md:grid-cols-2 gap-8 mb-8">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800 mb-4">About This Destination</h3>
+                            <p class="text-gray-600 leading-relaxed mb-6">${dest.longDescription}</p>
+                            
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="font-semibold text-gray-700">Best Time to Visit:</span>
+                                    <span class="text-gray-600">${dest.bestTime}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="font-semibold text-gray-700">Budget Range:</span>
+                                    <span class="text-orange-500 font-bold">₹${dest.budgetRange[0]/1000}k - ₹${dest.budgetRange[1]/1000}k</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="font-semibold text-gray-700">Region:</span>
+                                    <span class="text-gray-600 capitalize">${dest.region} India</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800 mb-4">Hidden Gems & Underrated Spots</h3>
+                            <ul class="space-y-2 mb-6">
+                                ${dest.hiddenGems.map(gem => `<li class="flex items-center text-gray-600"><span class="text-orange-500 mr-2">•</span>${gem}</li>`).join('')}
+                            </ul>
+                            
+                            <h4 class="font-semibold text-gray-700 mb-2">Popular Activities</h4>
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                ${dest.popularActivities.map(activity => `<span class="bg-orange-100 text-orange-700 px-2 py-1 rounded-full text-sm">${activity}</span>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-3 gap-6 mb-8">
+                        <div class="bg-orange-50 p-4 rounded-xl">
+                            <h4 class="font-bold text-gray-800 mb-2">🏨 Accommodations</h4>
+                            ${dest.accommodations.map(acc => `<p class="text-sm text-gray-600">${acc}</p>`).join('')}
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-xl">
+                            <h4 class="font-bold text-gray-800 mb-2">🍽️ Food Budget</h4>
+                            <p class="text-sm text-gray-600">${dest.foodBudget}</p>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-xl">
+                            <h4 class="font-bold text-gray-800 mb-2">🚗 Transportation</h4>
+                            <p class="text-sm text-gray-600">${dest.transportation}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button onclick="planRoute('${dest.name}')" 
+                                class="flex-1 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                            🗺️ Plan Route to ${dest.name}
+                        </button>
+                        <button onclick="bookmarkDestination(${dest.id})" 
+                                class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-lg font-semibold transition-colors">
+                            ⭐ Bookmark Destination
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+            
+            // Animate modal
+            if (typeof anime !== 'undefined') {
+                anime({
+                    targets: '#modal-content > div',
+                    opacity: [0, 1],
+                    scale: [0.8, 1],
+                    duration: 400,
+                    easing: 'easeOutQuad'
+                });
+            }
+        }
+
+        function closeDestinationModal() {
+            const modal = document.getElementById('destination-modal');
+            modal.classList.add('hidden');
+        }
+
+        function setView(view) {
+            currentView = view;
+            
+            // Update view buttons
+            document.getElementById('grid-view').classList.toggle('bg-orange-500', view === 'grid');
+            document.getElementById('grid-view').classList.toggle('text-white', view === 'grid');
+            document.getElementById('grid-view').classList.toggle('text-gray-600', view !== 'grid');
+            
+            document.getElementById('list-view').classList.toggle('bg-orange-500', view === 'list');
+            document.getElementById('list-view').classList.toggle('text-white', view === 'list');
+            document.getElementById('list-view').classList.toggle('text-gray-600', view !== 'list');
+            
+            renderDestinations();
+        }
+
+        function sortAndRenderDestinations() {
+            // Sort destinations
+            filteredDestinations.sort((a, b) => {
+                switch(currentSort) {
+                    case 'rating':
+                        return b.rating - a.rating;
+                    case 'budget-low':
+                        return a.budgetRange[0] - b.budgetRange[0];
+                    case 'budget-high':
+                        return b.budgetRange[1] - a.budgetRange[1];
+                    case 'name':
+                        return a.name.localeCompare(b.name);
+                    default: // popularity
+                        return b.rating - a.rating;
+                }
+            });
+            
+            renderDestinations();
+        }
+
+        function searchDestinations() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            
+            if (searchTerm === '') {
+                filteredDestinations = [...allDestinations];
+            } else {
+                filteredDestinations = allDestinations.filter(dest => 
+                    dest.name.toLowerCase().includes(searchTerm) ||
+                    dest.description.toLowerCase().includes(searchTerm) ||
+                    dest.region.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            sortAndRenderDestinations();
+        }
+
+        function bookmarkDestination(destId) {
+            // In a real app, this would save to user profile
+            showNotification('Destination bookmarked successfully!', 'success');
+            closeDestinationModal();
+        }
+
+        function loadMoreDestinations() {
+            // In a real app, this would load more destinations from API
+            showNotification('All destinations loaded!', 'info');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('destination-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeDestinationModal();
+            }
+        });
+    </script>
+</body>
+</html>
